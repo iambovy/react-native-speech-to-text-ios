@@ -31,7 +31,7 @@
 
 
 - (void) sendResult:(NSDictionary*)error :(NSDictionary*)bestTranscription :(NSArray*)transcriptions :(NSNumber*)isFinal {
-    //    NSString *eventName = notification.userInfo[@"name"];
+//    NSString *eventName = notification.userInfo[@"name"];
     NSMutableDictionary* result = [[NSMutableDictionary alloc] init];
     if (error.allValues.count > 0) {
         result[@"error"] = error;
@@ -45,28 +45,9 @@
     if (isFinal != nil) {
         result[@"isFinal"] = isFinal;
     }
-    
+
     [self.bridge.eventDispatcher sendAppEventWithName:@"SpeechToText"
                                                  body:result];
-}
-
-- (NSDictionary*) dicFromTranscription:(SFTranscription*) transcription {
-    NSMutableArray* secgmentsDics = [NSMutableArray new];
-    for (SFTranscriptionSegment* segment in transcription.segments) {
-        id dic = @{@"substring":segment.substring,
-                   @"substringRange":@{@"location":@(segment.substringRange.location),
-                                       @"length":@(segment.substringRange.length)},
-                   @"timestamp":@(segment.timestamp),
-                   @"duration":@(segment.duration),
-                   
-                   @"confidence":@(segment.confidence),
-                   @"alternativeSubstrings":segment.alternativeSubstrings,
-                   };
-        [secgmentsDics addObject:dic];
-    }
-    
-    return @{@"formattedString":transcription.formattedString,
-             @"segments":secgmentsDics};
 }
 
 - (void)speechRecognizer:(SFSpeechRecognizer *)speechRecognizer availabilityDidChange:(BOOL)available {
@@ -82,24 +63,24 @@ RCT_EXPORT_METHOD(finishRecognition)
     [self.inputNode removeTapOnBus:0];
     [self.audioEngine stop];
     [self.recognitionRequest endAudio];
-    
+
 }
 
 
 RCT_EXPORT_METHOD(stopRecognition)
 {
-    [self.inputNode removeTapOnBus:0];
-    [self.audioEngine stop];
-    [self.recognitionRequest endAudio];
+  [self.inputNode removeTapOnBus:0];
+  [self.audioEngine stop];
+  [self.recognitionRequest endAudio];
 }
 
 RCT_EXPORT_METHOD(startRecognition:(NSString*)localeStr)
 {
     self.audioEngine = [[AVAudioEngine alloc] init];
-    
+
     NSLocale *local =[[NSLocale alloc] initWithLocaleIdentifier:localeStr];
     self.speechRecognizer = [[SFSpeechRecognizer alloc] initWithLocale:local];
-    
+
     [SFSpeechRecognizer requestAuthorization:^(SFSpeechRecognizerAuthorizationStatus status) {
         dispatch_async(dispatch_get_main_queue(), ^{
             switch (status) {
@@ -117,26 +98,26 @@ RCT_EXPORT_METHOD(startRecognition:(NSString*)localeStr)
                 }
             }
         });
-        
+
     }];
-    
-    
-    if (self.recognitionTask) {
+
+
+  if (self.recognitionTask) {
         [self.recognitionTask cancel];
         self.recognitionTask = nil;
     }
-    
+
     AVAudioSession *session = [AVAudioSession sharedInstance];
     [session setCategory:AVAudioSessionCategoryRecord mode:AVAudioSessionModeMeasurement options:AVAudioSessionCategoryOptionDefaultToSpeaker error:nil];
     [session setActive:TRUE withOptions:AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation error:nil];
-    
+
     self.inputNode = self.audioEngine.inputNode;
-    
+
     self.recognitionRequest = [[SFSpeechAudioBufferRecognitionRequest alloc] init];
     self.recognitionRequest.shouldReportPartialResults = NO;
-    
+
     AVAudioFormat *format = [self.inputNode outputFormatForBus:0];
-    
+
     [self.inputNode installTapOnBus:0 bufferSize:1024 format:format block:^(AVAudioPCMBuffer * _Nonnull buffer, AVAudioTime * _Nonnull when) {
         [self.recognitionRequest appendAudioPCMBuffer:buffer];
     }];
@@ -144,22 +125,16 @@ RCT_EXPORT_METHOD(startRecognition:(NSString*)localeStr)
     NSError *error1;
     [self.audioEngine startAndReturnError:&error1];
     NSLog(@"%@", error1.description);
-    
+
     self.recognitionTask = [self.speechRecognizer recognitionTaskWithRequest:self.recognitionRequest resultHandler:^(SFSpeechRecognitionResult * _Nullable result, NSError * _Nullable error) {
-        
+
         if (result != nil) {
             NSMutableDictionary *result_dic = [NSMutableDictionary dictionary];
             [result_dic setObject:result.bestTranscription.formattedString forKey:@"formattedString"];
-            
-            NSMutableArray* transcriptionDics = [NSMutableArray new];
-            for (SFTranscription* transcription in result.transcriptions) {
-                [transcriptionDics addObject:[self dicFromTranscription:transcription]];
-            }
-            
-            [self sendResult:nil :result_dic :transcriptionDics :[NSNumber numberWithInt:1]];
-            
+            [self sendResult:nil :result_dic :nil :[NSNumber numberWithInt:1]];
+
         } else {
-            
+
             [self.audioEngine stop];;
             self.recognitionTask = nil;
             self.recognitionRequest = nil;
