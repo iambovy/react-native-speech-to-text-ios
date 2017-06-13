@@ -1,5 +1,5 @@
 
-# react-native-speech-to-text-ios [![npm version](https://img.shields.io/npm/v/react-native-maps.svg?style=flat)](https://www.npmjs.com/package/react-native-speech-to-text-ios)
+# react-native-speech-to-text-ios 
 
 React Native speech recognition component for iOS 10+
 
