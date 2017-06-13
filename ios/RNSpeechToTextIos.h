@@ -3,6 +3,5 @@
 
 @interface RNSpeechToTextIos : NSObject <RCTBridgeModule>
 
-
 @end
-  
+
