@@ -114,7 +114,7 @@ RCT_EXPORT_METHOD(startRecognition:(NSString*)localeStr)
     self.inputNode = self.audioEngine.inputNode;
 
     self.recognitionRequest = [[SFSpeechAudioBufferRecognitionRequest alloc] init];
-    self.recognitionRequest.shouldReportPartialResults = NO;
+    self.recognitionRequest.shouldReportPartialResults = YES;
 
     AVAudioFormat *format = [self.inputNode outputFormatForBus:0];
 
