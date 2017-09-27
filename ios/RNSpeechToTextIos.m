@@ -138,6 +138,9 @@ RCT_EXPORT_METHOD(startRecognition:(NSString*)localeStr)
             [self.audioEngine stop];;
             self.recognitionTask = nil;
             self.recognitionRequest = nil;
+            NSMutableDictionary *error_dic = [NSMutableDictionary dictionary];
+           [error_dic setObject:@"result is null" forKey:@"message"];
+           [self sendResult:error_dic :nil :nil :[NSNumber numberWithInt:0]];
         }
     }];
 }
