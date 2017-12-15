@@ -60,8 +60,6 @@ RCT_EXPORT_METHOD(finishRecognition)
 {
     // lets finish it
     [self.recognitionTask finish];
-    [self.inputNode removeTapOnBus:0];
-    [self.audioEngine stop];
     [self.recognitionRequest endAudio];
 
 }
@@ -107,9 +105,9 @@ RCT_EXPORT_METHOD(startRecognition:(NSString*)localeStr)
         self.recognitionTask = nil;
     }
 
-    AVAudioSession *session = [AVAudioSession sharedInstance];
-    [session setCategory:AVAudioSessionCategoryRecord mode:AVAudioSessionModeMeasurement options:AVAudioSessionCategoryOptionDefaultToSpeaker error:nil];
-    [session setActive:TRUE withOptions:AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation error:nil];
+    self.audioSession = [AVAudioSession sharedInstance];
+    [self.audioSession setCategory:AVAudioSessionCategoryPlayAndRecord mode:AVAudioSessionModeMeasurement options:AVAudioSessionCategoryOptionDefaultToSpeaker error:nil];
+    [self.audioSession setActive:TRUE withOptions:AVAudioSessionSetActiveOptionNotifyOthersOnDeactivation error:nil];
 
     self.inputNode = self.audioEngine.inputNode;
 
@@ -135,7 +133,7 @@ RCT_EXPORT_METHOD(startRecognition:(NSString*)localeStr)
 
         } else {
 
-            [self.audioEngine stop];;
+            [self.audioEngine stop];
             self.recognitionTask = nil;
             self.recognitionRequest = nil;
             NSMutableDictionary *error_dic = [NSMutableDictionary dictionary];
